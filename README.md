@@ -8,7 +8,6 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![Accuracy](https://img.shields.io/badge/Val%20Accuracy-99.26%25-22c55e?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
 Sube una imagen y obtén predicciones con nivel de confianza para 4 clases: **avión · bicicleta · coche · perro**
 
