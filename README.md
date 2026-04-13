@@ -2,7 +2,7 @@
 title: Image Classifier ResNet18
 emoji: 🖼️
 colorFrom: indigo
-colorTo: cyan
+colorTo: blue
 sdk: docker
 app_port: 7860
 pinned: false
