@@ -3,66 +3,544 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Classifier</title>
+  <title>Image Classifier · ResNet18</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="container">
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <span class="nav-dot"></span>
+      <span>Image Classifier</span>
+      <span class="nav-chip">ResNet18</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#model">Modelo</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#training">Entrenamiento</a></li>
+      <li><a href="#demo" class="nav-cta">Probar ↗</a></li>
+    </ul>
+  </div>
+</nav>
 
-    <!-- Header -->
-    <header>
-      <h1>Image Classifier</h1>
-      <p class="subtitle">Sube una imagen y el modelo te dirá si es un avión, bicicleta, coche o perro.</p>
-    </header>
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <span class="hero-pill">Deep Learning · Transfer Learning · CIFAR</span>
+    <h1 class="hero-title">
+      Clasificación de Imágenes<br>
+      <span class="grad-text">con ResNet18</span>
+    </h1>
+    <p class="hero-sub">
+      Red neuronal convolucional profunda pre-entrenada en ImageNet y adaptada
+      para clasificar imágenes en 4 categorías en tiempo real.
+    </p>
+    <div class="hero-classes">
+      <span>✈️ Avión</span>
+      <span>🚲 Bicicleta</span>
+      <span>🚗 Coche</span>
+      <span>🐶 Perro</span>
+    </div>
+    <a href="#demo" class="hero-btn">Clasificar imagen →</a>
+  </div>
+  <div class="hero-scroll">↓ explorar</div>
+</section>
 
-    <!-- Upload area -->
-    <section id="upload-section">
+<!-- ── Model ──────────────────────────────────────────────────────────────── -->
+<section id="model" class="section">
+  <div class="sec-header">
+    <span class="sec-pill">El Modelo</span>
+    <h2>ResNet18 con Transfer Learning</h2>
+    <p>Una red pre-entrenada en 1.2 M de imágenes, adaptada para nuestras 4 clases</p>
+  </div>
+
+  <div class="model-grid">
+    <div class="info-cards">
+      <div class="icard reveal">
+        <div class="icard-icon">🏗️</div>
+        <h3>Arquitectura</h3>
+        <p>ResNet18 tiene 18 capas con <strong>conexiones residuales</strong> (skip connections) que permiten entrenar redes profundas evitando el problema del gradiente que desaparece.</p>
+      </div>
+      <div class="icard reveal">
+        <div class="icard-icon">⚡</div>
+        <h3>Pre-entrenamiento</h3>
+        <p>Los pesos se inicializan desde <strong>ImageNet</strong> (1.2 M imágenes, 1 000 clases). El modelo ya conoce bordes, texturas, formas y objetos complejos.</p>
+      </div>
+      <div class="icard reveal">
+        <div class="icard-icon">🎯</div>
+        <h3>Fine-tuning</h3>
+        <p>La capa FC final se sustituye por una nueva de <strong>4 salidas</strong>. El modelo transfiere su conocimiento visual a nuestras 4 clases.</p>
+      </div>
+      <div class="icard reveal">
+        <div class="icard-icon">📐</div>
+        <h3>Entrada</h3>
+        <p>Las imágenes se redimensionan a <strong>224 × 224 px</strong> y se normalizan con la media y desviación de ImageNet antes de entrar en la red.</p>
+      </div>
+    </div>
+
+    <div class="arch-panel reveal">
+      <canvas id="arch-canvas"></canvas>
+      <div class="arch-legend">
+        <span><i style="background:#6366f1"></i>Conv Inicial</span>
+        <span><i style="background:#7c3aed"></i>Layer 1</span>
+        <span><i style="background:#0891b2"></i>Layer 2</span>
+        <span><i style="background:#059669"></i>Layer 3-4</span>
+        <span><i style="background:#d97706"></i>Salida FC</span>
+      </div>
+      <p class="arch-hint">↔ Arrastra para rotar</p>
+    </div>
+  </div>
+
+  <!-- Residual block diagram -->
+  <div class="resblock-card reveal">
+    <h3>¿Qué es una conexión residual?</h3>
+    <p class="resblock-intro">La entrada <strong>x</strong> sigue dos caminos en paralelo y ambos se suman al final. El bloque solo tiene que aprender la <em>diferencia</em> F(x), no toda la transformación desde cero.</p>
+
+    <div class="resblock-body">
+      <!-- Diagram -->
+      <div class="resblock-diagram">
+        <div class="rb-node rb-in">x &nbsp;<small>entrada</small></div>
+
+        <div class="rb-split">
+          <div class="rb-main-path">
+            <div class="rb-path-tag">camino principal</div>
+            <div class="rb-arrow">↓</div>
+            <div class="rb-box rb-conv">Conv 3×3 + BN + ReLU</div>
+            <div class="rb-arrow">↓</div>
+            <div class="rb-box rb-conv">Conv 3×3 + BN</div>
+            <div class="rb-arrow">↓</div>
+            <div class="rb-path-sublabel">aprende F(x)</div>
+          </div>
+          <div class="rb-skip-path">
+            <div class="rb-path-tag rb-skip-tag">skip connection</div>
+            <div class="rb-skip-rail"></div>
+            <div class="rb-path-sublabel rb-skip-sublabel">x sin cambios</div>
+          </div>
+        </div>
+
+        <div class="rb-sum-row">
+          <div class="rb-add">⊕</div>
+          <code class="rb-eq">F(x) + x</code>
+        </div>
+        <div class="rb-arrow">↓</div>
+        <div class="rb-node rb-out">ReLU &nbsp;<small>salida</small></div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="resblock-explain">
+        <div class="rb-insight">
+          <span>🎯</span>
+          <div>
+            <strong>El bloque aprende solo la corrección</strong>
+            <p>No parte de cero: aprende únicamente qué añadir sobre x. Si no hay nada útil que cambiar, F(x) = 0 y x pasa intacta — la red no puede empeorar lo que ya tenía.</p>
+          </div>
+        </div>
+        <div class="rb-insight">
+          <span>🌊</span>
+          <div>
+            <strong>El gradiente fluye sin desvanecerse</strong>
+            <p>Durante el entrenamiento, el error viaja hacia atrás directamente por el skip. Sin esta vía directa, en redes de 18+ capas el gradiente se atenúa hasta volverse inutilizable.</p>
+          </div>
+        </div>
+        <div class="rb-analogy">
+          <p>💡 <strong>Analogía:</strong> Al corregir un borrador, no reescribes el texto completo — anotas solo las correcciones en el margen y las sumas al original. Si no hay nada que corregir, el texto queda exactamente igual.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pipeline ────────────────────────────────────────────────────────────── -->
+<section id="pipeline" class="section section-alt">
+  <div class="sec-header">
+    <span class="sec-pill">Pipeline</span>
+    <h2>Proceso de Clasificación</h2>
+    <p>Cómo una imagen se convierte en una predicción, paso a paso</p>
+  </div>
+
+  <div class="pipeline-steps">
+    <div class="pip-step reveal" style="--d:0s">
+      <div class="pip-cube pip-c1">📷</div>
+      <div class="pip-info">
+        <span class="pip-num">01</span>
+        <h3>Imagen de entrada</h3>
+        <p>Acepta cualquier resolución en JPEG, PNG o WebP.</p>
+        <span class="pip-tag">Cualquier tamaño</span>
+      </div>
+    </div>
+    <div class="pip-conn reveal" style="--d:.05s">→</div>
+
+    <div class="pip-step reveal" style="--d:.1s">
+      <div class="pip-cube pip-c2">⚙️</div>
+      <div class="pip-info">
+        <span class="pip-num">02</span>
+        <h3>Preprocesado</h3>
+        <p>Redimensión a 224 × 224 px, normalización con estadísticas ImageNet (μ, σ por canal).</p>
+        <span class="pip-tag">224 × 224 × 3</span>
+      </div>
+    </div>
+    <div class="pip-conn reveal" style="--d:.15s">→</div>
+
+    <div class="pip-step reveal" style="--d:.2s">
+      <div class="pip-cube pip-c3">🧠</div>
+      <div class="pip-info">
+        <span class="pip-num">03</span>
+        <h3>ResNet18 Backbone</h3>
+        <p>17 capas convolucionales en 4 grupos extraen 512 mapas de características.</p>
+        <span class="pip-tag">512 features</span>
+      </div>
+    </div>
+    <div class="pip-conn reveal" style="--d:.25s">→</div>
+
+    <div class="pip-step reveal" style="--d:.3s">
+      <div class="pip-cube pip-c4">📊</div>
+      <div class="pip-info">
+        <span class="pip-num">04</span>
+        <h3>Global Avg Pool + FC</h3>
+        <p>Pooling global reduce 512 vectores a uno. La capa FC produce 4 logits, uno por clase.</p>
+        <span class="pip-tag">4 logits</span>
+      </div>
+    </div>
+    <div class="pip-conn reveal" style="--d:.35s">→</div>
+
+    <div class="pip-step reveal" style="--d:.4s">
+      <div class="pip-cube pip-c5">✅</div>
+      <div class="pip-info">
+        <span class="pip-num">05</span>
+        <h3>Softmax → Predicción</h3>
+        <p>Convierte logits en probabilidades (suma = 100%). La clase con mayor valor es la predicción final.</p>
+        <span class="pip-tag">Probabilidades %</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature maps visual -->
+  <div class="fmaps-section reveal">
+    <h3>¿Qué "ve" la red en cada profundidad?</h3>
+    <div class="fmaps-grid">
+      <div class="fmap-item">
+        <div class="fmap-vis fmap-1"></div>
+        <strong>Bordes y colores</strong>
+        <small>Primeras capas — filtros de Gabor</small>
+      </div>
+      <div class="fmap-item">
+        <div class="fmap-vis fmap-2"></div>
+        <strong>Texturas y patrones</strong>
+        <small>Capas intermedias</small>
+      </div>
+      <div class="fmap-item">
+        <div class="fmap-vis fmap-3"></div>
+        <strong>Partes de objetos</strong>
+        <small>Capas profundas — ruedas, alas…</small>
+      </div>
+      <div class="fmap-item">
+        <div class="fmap-vis fmap-4"></div>
+        <strong>Objeto completo</strong>
+        <small>Última representación</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Training ────────────────────────────────────────────────────────────── -->
+<section id="training" class="section">
+  <div class="sec-header">
+    <span class="sec-pill">Entrenamiento</span>
+    <h2>Dataset y Estrategia de Entrenamiento</h2>
+    <p>Cómo se manejó el desbalance de clases y el fine-tuning en dos fases</p>
+  </div>
+
+  <div class="training-top">
+    <!-- 3D bar chart -->
+    <div class="dataset-panel reveal">
+      <h3>Distribución del Dataset</h3>
+      <p class="panel-sub">CIFAR-10 + CIFAR-100 — entrenamiento</p>
+      <canvas id="chart-canvas"></canvas>
+      <div class="chart-labels">
+        <span style="color:#6366f1">✈️ ~5 000</span>
+        <span style="color:#f59e0b">🚲 ~500</span>
+        <span style="color:#06b6d4">🚗 ~5 000</span>
+        <span style="color:#10b981">🐶 ~5 000</span>
+      </div>
+      <div class="dataset-sources">
+        <span class="ds-tag ds-blue">CIFAR-10 → avión, coche, perro</span>
+        <span class="ds-tag ds-amber">CIFAR-100 → bicicleta ⚠️ ×10 menos</span>
+      </div>
+    </div>
+
+    <!-- Imbalance handling -->
+    <div class="imbalance-panel reveal">
+      <h3>Manejo del Desbalance</h3>
+      <p class="panel-sub">La bicicleta tiene 10× menos muestras que el resto</p>
+
+      <div class="technique">
+        <div class="technique-icon">⚖️</div>
+        <div>
+          <h4>WeightedRandomSampler</h4>
+          <p>La bicicleta se sobremuestrea 10× durante el entrenamiento para que aparezca con la misma frecuencia que el resto.</p>
+        </div>
+      </div>
+      <div class="technique">
+        <div class="technique-icon">📉</div>
+        <div>
+          <h4>Class Weights en CrossEntropyLoss</h4>
+          <p>La función de pérdida penaliza más los errores en bicicleta. Pesos: <code>[1.0, 10.0, 1.0, 1.0]</code></p>
+        </div>
+      </div>
+
+      <div class="wbars">
+        <div class="wbar-row">
+          <span class="wbar-label">✈️ Avión</span>
+          <div class="wbar-track"><div class="weight-fill wbar-fill" data-pct="10%" style="background:#6366f1;width:0"></div></div>
+          <span class="wbar-val">×1.0</span>
+        </div>
+        <div class="wbar-row">
+          <span class="wbar-label">🚲 Bicicleta</span>
+          <div class="wbar-track"><div class="weight-fill wbar-fill" data-pct="100%" style="background:#f59e0b;width:0"></div></div>
+          <span class="wbar-val">×10.0</span>
+        </div>
+        <div class="wbar-row">
+          <span class="wbar-label">🚗 Coche</span>
+          <div class="wbar-track"><div class="weight-fill wbar-fill" data-pct="10%" style="background:#06b6d4;width:0"></div></div>
+          <span class="wbar-val">×1.0</span>
+        </div>
+        <div class="wbar-row">
+          <span class="wbar-label">🐶 Perro</span>
+          <div class="wbar-track"><div class="weight-fill wbar-fill" data-pct="10%" style="background:#10b981;width:0"></div></div>
+          <span class="wbar-val">×1.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-phase training -->
+  <div class="phases-wrapper reveal">
+    <h3>Fine-tuning en Dos Fases</h3>
+
+    <div class="phases-row">
+      <div class="phase-card phase-1">
+        <div class="phase-badge">Fase 1 · 5 épocas</div>
+        <div class="phase-icon-big">🔒</div>
+        <h4>Backbone Congelado</h4>
+        <p>Solo se entrena la capa de clasificación final. Los pesos del backbone ResNet18 permanecen fijos.</p>
+        <div class="phase-params">
+          <div class="pp"><span>LR Head</span><code>1×10⁻³</code></div>
+          <div class="pp"><span>Backbone</span><code>Congelado</code></div>
+        </div>
+        <div class="phase-why">
+          <strong>¿Por qué?</strong> Evita destruir los pesos pre-entrenados de ImageNet al comenzar con un learning rate alto.
+        </div>
+      </div>
+
+      <div class="phases-arrow-big">→</div>
+
+      <div class="phase-card phase-2">
+        <div class="phase-badge">Fase 2 · 15 épocas</div>
+        <div class="phase-icon-big">🔓</div>
+        <h4>Fine-tuning Completo</h4>
+        <p>Todo el modelo se entrena con learning rates diferenciales: el backbone aprende más despacio que la cabeza.</p>
+        <div class="phase-params">
+          <div class="pp"><span>LR Head</span><code>1×10⁻³</code></div>
+          <div class="pp"><span>LR Backbone</span><code>1×10⁻⁴</code></div>
+        </div>
+        <div class="phase-why">
+          <strong>¿Por qué?</strong> El backbone adapta suavemente sus features; la cabeza aprende más rápido las nuevas clases.
+        </div>
+      </div>
+    </div>
+
+    <!-- Loss curve SVG -->
+    <div class="loss-curve-card">
+      <h4>Curva de pérdida durante el entrenamiento</h4>
+      <svg class="loss-svg" viewBox="0 0 640 240" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- Train fill gradient -->
+          <linearGradient id="lg-train-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6366f1" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#6366f1" stop-opacity="0.02"/>
+          </linearGradient>
+          <!-- Val fill gradient -->
+          <linearGradient id="lg-val-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.01"/>
+          </linearGradient>
+          <!-- Phase backgrounds -->
+          <linearGradient id="lg-ph1-bg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#6366f1" stop-opacity="0.06"/>
+            <stop offset="100%" stop-color="#6366f1" stop-opacity="0.02"/>
+          </linearGradient>
+          <linearGradient id="lg-ph2-bg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.02"/>
+            <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.06"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Phase background shading -->
+        <rect x="50" y="20" width="144" height="185" fill="url(#lg-ph1-bg)"/>
+        <rect x="194" y="20" width="431" height="185" fill="url(#lg-ph2-bg)"/>
+
+        <!-- Horizontal grid lines -->
+        <line x1="50" y1="66"  x2="625" y2="66"  stroke="#1e293b" stroke-width="1" stroke-dasharray="4,5"/>
+        <line x1="50" y1="112" x2="625" y2="112" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,5"/>
+        <line x1="50" y1="158" x2="625" y2="158" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,5"/>
+
+        <!-- Axes -->
+        <line x1="50" y1="20"  x2="50"  y2="205" stroke="#334155" stroke-width="1.5"/>
+        <line x1="50" y1="205" x2="625" y2="205" stroke="#334155" stroke-width="1.5"/>
+
+        <!-- Phase divider -->
+        <line x1="194" y1="20" x2="194" y2="205" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+        <!-- Phase label pills -->
+        <rect x="58"  y="23" width="102" height="17" rx="4" fill="rgba(99,102,241,0.14)"/>
+        <text x="109" y="35" font-size="9.5" fill="#818cf8" font-family="Inter,sans-serif" text-anchor="middle" font-weight="700">Fase 1 · head only</text>
+
+        <rect x="202" y="23" width="138" height="17" rx="4" fill="rgba(6,182,212,0.12)"/>
+        <text x="271" y="35" font-size="9.5" fill="#22d3ee" font-family="Inter,sans-serif" text-anchor="middle" font-weight="700">Fase 2 · full fine-tune</text>
+
+        <!-- Val loss fill area -->
+        <path d="M 50 29 C 90 40, 160 132, 194 142 L 194 205 L 50 205 Z"
+              fill="url(#lg-val-fill)" opacity="0.5"/>
+        <path d="M 194 142 C 225 136, 280 152, 337 166 C 430 175, 540 181, 625 184 L 625 205 L 194 205 Z"
+              fill="url(#lg-val-fill)" opacity="0.5"/>
+
+        <!-- Train loss fill area -->
+        <path d="M 50 38 C 90 52, 160 145, 194 154 L 194 205 L 50 205 Z"
+              fill="url(#lg-train-fill)"/>
+        <path d="M 194 154 C 215 148, 265 165, 337 177 C 430 186, 540 191, 625 193 L 625 205 L 194 205 Z"
+              fill="url(#lg-train-fill)"/>
+
+        <!-- Val loss curve (dashed) -->
+        <path d="M 50 29 C 90 40, 160 132, 194 142"
+              stroke="#06b6d4" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="7,4" opacity="0.75"/>
+        <path d="M 194 142 C 225 136, 280 152, 337 166 C 430 175, 540 181, 625 184"
+              stroke="#06b6d4" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="7,4" opacity="0.75"/>
+
+        <!-- Train loss curve -->
+        <path d="M 50 38 C 90 52, 160 145, 194 154"
+              stroke="#6366f1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 194 154 C 215 148, 265 165, 337 177 C 430 186, 540 191, 625 193"
+              stroke="#6366f1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+        <!-- Endpoint dots (train) -->
+        <circle cx="50"  cy="38"  r="4" fill="#6366f1" stroke="#0a0e1a" stroke-width="2"/>
+        <circle cx="194" cy="154" r="4" fill="#6366f1" stroke="#0a0e1a" stroke-width="2"/>
+        <circle cx="625" cy="193" r="4" fill="#6366f1" stroke="#0a0e1a" stroke-width="2"/>
+
+        <!-- Y-axis ticks + labels -->
+        <line x1="46" y1="20"  x2="50" y2="20"  stroke="#475569" stroke-width="1.5"/>
+        <line x1="46" y1="66"  x2="50" y2="66"  stroke="#475569" stroke-width="1.5"/>
+        <line x1="46" y1="112" x2="50" y2="112" stroke="#475569" stroke-width="1.5"/>
+        <line x1="46" y1="158" x2="50" y2="158" stroke="#475569" stroke-width="1.5"/>
+        <line x1="46" y1="205" x2="50" y2="205" stroke="#475569" stroke-width="1.5"/>
+
+        <text x="42" y="24"  font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="end">2.0</text>
+        <text x="42" y="70"  font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="end">1.5</text>
+        <text x="42" y="116" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="end">1.0</text>
+        <text x="42" y="162" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="end">0.5</text>
+        <text x="42" y="209" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="end">0</text>
+
+        <!-- X-axis ticks + labels -->
+        <line x1="50"  y1="205" x2="50"  y2="210" stroke="#475569" stroke-width="1.5"/>
+        <line x1="194" y1="205" x2="194" y2="210" stroke="#475569" stroke-width="1.5"/>
+        <line x1="337" y1="205" x2="337" y2="210" stroke="#475569" stroke-width="1.5"/>
+        <line x1="481" y1="205" x2="481" y2="210" stroke="#475569" stroke-width="1.5"/>
+        <line x1="625" y1="205" x2="625" y2="210" stroke="#475569" stroke-width="1.5"/>
+
+        <text x="50"  y="222" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="middle">0</text>
+        <text x="194" y="222" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="middle">5</text>
+        <text x="337" y="222" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="middle">10</text>
+        <text x="481" y="222" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="middle">15</text>
+        <text x="625" y="222" font-size="9" fill="#64748b" font-family="Inter,sans-serif" text-anchor="middle">20</text>
+
+        <!-- Axis titles -->
+        <text x="14" y="115" font-size="9.5" fill="#94a3b8" font-family="Inter,sans-serif" text-anchor="middle"
+              transform="rotate(-90,14,115)" font-weight="500">Loss</text>
+        <text x="337" y="237" font-size="9.5" fill="#94a3b8" font-family="Inter,sans-serif" text-anchor="middle"
+              font-weight="500">Época</text>
+
+        <!-- Legend box -->
+        <rect x="450" y="48" width="162" height="52" rx="6"
+              fill="rgba(10,14,26,0.75)" stroke="#1e293b" stroke-width="1"/>
+        <line x1="461" y1="64" x2="485" y2="64" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="473" cy="64" r="3.5" fill="#6366f1" stroke="#0a0e1a" stroke-width="1.5"/>
+        <text x="492" y="68" font-size="9.5" fill="#94a3b8" font-family="Inter,sans-serif" font-weight="500">Train loss</text>
+        <line x1="461" y1="85" x2="485" y2="85" stroke="#06b6d4" stroke-width="2"
+              stroke-linecap="round" stroke-dasharray="7,4" opacity="0.75"/>
+        <text x="492" y="89" font-size="9.5" fill="#94a3b8" font-family="Inter,sans-serif" font-weight="500">Val loss</text>
+      </svg>
+    </div>
+
+    <!-- Hyperparams grid -->
+    <div class="hp-grid">
+      <div class="hp-card reveal"><span class="hp-ico">📦</span><span class="hp-lbl">Batch Size</span><strong>64</strong></div>
+      <div class="hp-card reveal"><span class="hp-ico">🔄</span><span class="hp-lbl">Total Épocas</span><strong>20</strong></div>
+      <div class="hp-card reveal"><span class="hp-ico">⚖️</span><span class="hp-lbl">Weight Decay</span><strong>1×10⁻⁴</strong></div>
+      <div class="hp-card reveal"><span class="hp-ico">📅</span><span class="hp-lbl">LR Scheduler</span><strong>StepLR ×0.1</strong></div>
+      <div class="hp-card reveal"><span class="hp-ico">🖼️</span><span class="hp-lbl">Entrada</span><strong>224 × 224</strong></div>
+      <div class="hp-card reveal"><span class="hp-ico">🔧</span><span class="hp-lbl">Optimizador</span><strong>Adam</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Demo ────────────────────────────────────────────────────────────────── -->
+<section id="demo" class="section section-alt">
+  <div class="sec-header">
+    <span class="sec-pill">Demo</span>
+    <h2>Prueba el Modelo</h2>
+    <p>Sube una imagen y clasifícala en tiempo real con ResNet18</p>
+  </div>
+
+  <div class="demo-wrap">
+    <div id="upload-section">
       <div id="drop-zone" role="button" tabindex="0" aria-label="Zona de carga de imagen">
         <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
         </svg>
         <p class="drop-text"><strong>Arrastra una imagen aquí</strong></p>
-        <p class="drop-subtext">o haz clic para seleccionar un archivo</p>
+        <p class="drop-subtext">o haz clic para seleccionar</p>
         <p class="drop-formats">JPEG · PNG · WebP</p>
         <input type="file" id="file-input" accept="image/*" hidden />
       </div>
-    </section>
+    </div>
 
-    <!-- Preview + results -->
-    <section id="result-section" hidden>
-
+    <div id="result-section" hidden>
       <div class="result-layout">
-
-        <!-- Image preview -->
         <div class="preview-box">
           <img id="preview-img" src="" alt="Imagen subida" />
         </div>
-
-        <!-- Prediction bars -->
         <div class="predictions-box">
           <div id="loading-indicator" class="loading" hidden>
             <div class="spinner"></div>
             <p>Analizando imagen…</p>
           </div>
-
           <div id="predictions-container" hidden>
             <h2 id="top-label"></h2>
             <div id="bars"></div>
           </div>
         </div>
-
       </div>
-
-      <button id="reset-btn" class="reset-btn">
-        Probar otra imagen
-      </button>
-
-    </section>
-
+      <button id="reset-btn" class="reset-btn">Probar otra imagen</button>
+    </div>
   </div>
+</section>
 
-  <script src="app.js"></script>
+<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p><strong>ResNet18</strong> · Transfer Learning desde ImageNet · Fine-tuning en dos fases</p>
+    <p class="footer-sub">CIFAR-10 + CIFAR-100 · 4 clases · ~11.2 M parámetros</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="viz.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

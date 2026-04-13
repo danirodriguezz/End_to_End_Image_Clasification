@@ -1,3 +1,13 @@
+---
+title: Image Classifier ResNet18
+emoji: 🖼️
+colorFrom: indigo
+colorTo: cyan
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 <div align="center">
 
 # Image Classifier

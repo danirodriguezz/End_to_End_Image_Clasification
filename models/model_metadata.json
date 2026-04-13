@@ -1,0 +1,13 @@
+{
+  "class_names": [
+    "airplane",
+    "bicycle",
+    "car",
+    "dog"
+  ],
+  "input_size": 224,
+  "architecture": "resnet18",
+  "val_accuracy": 0.9926,
+  "trained_date": "2026-04-12",
+  "num_epochs": 10
+}

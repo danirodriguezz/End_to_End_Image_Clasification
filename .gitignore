@@ -1,8 +1,10 @@
 # Datasets (grandes, se descargan automáticamente)
 data/
 
-# Modelos entrenados
-models/
+# Modelos entrenados — los pesos finales SÍ se suben (necesarios para el despliegue)
+models/*
+!models/best_model_weights.pth
+!models/model_metadata.json
 
 # Python
 __pycache__/
